@@ -19,7 +19,7 @@ const SignUpPage = () => {
         />
         <TextField
           name="password"
-          label="Email"
+          label="Password"
           variant="outlined"
           type="password"
           helperText={state.error}
