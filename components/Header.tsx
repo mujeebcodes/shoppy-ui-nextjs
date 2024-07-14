@@ -16,12 +16,15 @@ import AdbIcon from "@mui/icons-material/Adb";
 import { ShoppingBasket } from "@mui/icons-material";
 import { AuthContext } from "@/app/auth/auth-context";
 import { protectedRoutes, publicRoutes } from "@/app/common/constants/routes";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-// const pages = ["Products", "Pricing", "Blog"];
-// const settings = ["Profile", "Account", "Dashboard", "Logout"];
-
-const Header = () => {
+interface HeaderProps {
+  logout: () => Promise<void>;
+}
+const Header = ({ logout }: HeaderProps) => {
   const isAuthenticated = React.useContext(AuthContext);
+  const router = useRouter();
 
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -45,8 +48,8 @@ const Header = () => {
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
+            component={Link}
+            href="/"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -90,7 +93,13 @@ const Header = () => {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page.title} onClick={handleCloseNavMenu}>
+                <MenuItem
+                  key={page.title}
+                  onClick={() => {
+                    router.push(page.path);
+                    handleCloseNavMenu();
+                  }}
+                >
                   <Typography textAlign="center">{page.title}</Typography>
                 </MenuItem>
               ))}
@@ -119,21 +128,24 @@ const Header = () => {
             {pages.map((page) => (
               <Button
                 key={page.title}
-                onClick={handleCloseNavMenu}
+                onClick={() => {
+                  router.push(page.path);
+                  handleCloseNavMenu();
+                }}
                 sx={{ my: 2, color: "white", display: "block" }}
               >
                 {page.title}
               </Button>
             ))}
           </Box>
-          {isAuthenticated && <Settings />}
+          {isAuthenticated && <Settings logout={logout} />}
         </Toolbar>
       </Container>
     </AppBar>
   );
 };
 
-const Settings = () => {
+const Settings = ({ logout }: HeaderProps) => {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
@@ -166,7 +178,13 @@ const Settings = () => {
         open={Boolean(anchorElUser)}
         onClose={handleCloseUserMenu}
       >
-        <MenuItem key="Logout" onClick={handleCloseUserMenu}>
+        <MenuItem
+          key="Logout"
+          onClick={async () => {
+            await logout();
+            handleCloseUserMenu();
+          }}
+        >
           <Typography textAlign="center">Logout</Typography>
         </MenuItem>
       </Menu>
