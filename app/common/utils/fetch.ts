@@ -4,23 +4,27 @@ import { getErrorMessage } from "./errors";
 
 export const getHeaders = () => ({ Cookie: cookies().toString() });
 
-export const post = async (path: string, formData: FormData) => {
+export const post = async (path: string, data: FormData | object) => {
+  const body = data instanceof FormData ? Object.fromEntries(data) : data;
   const res = await fetch(`${API_URL}/${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...getHeaders() },
-    body: JSON.stringify(Object.fromEntries(formData)),
+    body: JSON.stringify(body),
   });
-
   const parsedRes = await res.json();
   if (!res.ok) {
     return { error: getErrorMessage(parsedRes) };
   }
-
   return { error: "", data: parsedRes };
 };
 
-export const get = async <T>(path: string, tags?: string[]) => {
-  const res = await fetch(`${API_URL}/${path}`, {
+export const get = async <T>(
+  path: string,
+  tags?: string[],
+  params?: URLSearchParams
+) => {
+  const url = params ? `${API_URL}/${path}?` + params : `${API_URL}/${path}`;
+  const res = await fetch(url, {
     headers: { ...getHeaders() },
     next: { tags },
   });
